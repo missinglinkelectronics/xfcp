@@ -27,6 +27,13 @@ from . import node
 
 DBG_PRINT = False
 
+PRINT_VERBOSITY_TRACE = 4
+PRINT_VERBOSITY_INFO = 3
+PRINT_VERBOSITY_WARN = 2
+PRINT_VERBOSITY_ERROR = 1
+PRINT_VERBOSITY_QUIET = 0
+PRINT_VERBOSITY = PRINT_VERBOSITY_INFO
+
 # register offsets taken from Intel document:
 # L- and H-Tile Transceiver PHY User Guide 683621 | 2022.07.20
 # chapter A. Logical View of the L-Tile/H-Tile Transceiver Registers
@@ -46,6 +53,28 @@ prbs_mode_mapping = {
     'prbs15': PRBS_MODE_PRBS15,
     'prbs23': PRBS_MODE_PRBS23,
     'prbs31': PRBS_MODE_PRBS31
+}
+
+PRBS_GENERATOR_TX_PMA_DATA_SEL_SQUARE_WAVE = 0b00101
+PRBS_GENERATOR_TX_PMA_DATA_SEL_PRBS_PATTERN = 0b00100
+
+PRBS_GENERATOR_PRBS9_DWIDTH_ENABLE = 0b1
+PRBS_GENERATOR_PRBS9_DWIDTH_DISABLE = 0b0
+
+PRBS_GENERATOR_SERIALIZER_MODE_64BIT = 0b011
+PRBS_GENERATOR_SERIALIZER_MODE_10BIT = 0b100
+
+prbs_generator_serializer_mode_mapping = {
+    64: PRBS_GENERATOR_SERIALIZER_MODE_64BIT,
+    10: PRBS_GENERATOR_SERIALIZER_MODE_10BIT
+}
+
+PRBS_VERIFIER_DESERIALIZER_FACTOR_64BIT = 0xE
+PRBS_VERIFIER_DESERIALIZER_FACTOR_10BIT = 0x1
+
+prbs_verifier_deserializer_factor_mapping = {
+    64: PRBS_VERIFIER_DESERIALIZER_FACTOR_64BIT,
+    10: PRBS_VERIFIER_DESERIALIZER_FACTOR_10BIT
 }
 
 class LTileHTileNode(node.MemoryNode):
@@ -151,8 +180,13 @@ class LTileHTileNode(node.MemoryNode):
         return val
 
     def set_prbs_gen_prbs_tx_pma_data_sel(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_gen_prbs_tx_pma_data_sel")
+        if ((val != PRBS_GENERATOR_TX_PMA_DATA_SEL_SQUARE_WAVE) and \
+                (val != PRBS_GENERATOR_TX_PMA_DATA_SEL_PRBS_PATTERN)):
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_gen_prbs_tx_pma_data_sel: unsupport TX PMA data selected: " + str(hex(val)))
+            exit(1)
         # bits[4:3] to 0x008[6:5]
         self.masked_write(0x008, 0b1100000, (val & 0b11000) << 2)
         # bits[2:0] to 0x006[2:0]
@@ -189,10 +223,24 @@ class LTileHTileNode(node.MemoryNode):
         return val
 
     def set_prbs_gen_prbs_pat(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_gen_prbs_pat")
+        # check if argument is a string and map it to register value
         if type(val) is str:
             val = prbs_mode_mapping[val]
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_gen_prbs_pat: argument given is not a string")
+            exit(1)
+        if ((val != PRBS_MODE_OFF) and \
+                 (val != PRBS_MODE_PRBS7) and \
+                 (val != PRBS_MODE_PRBS9) and \
+                 (val != PRBS_MODE_PRBS15) and \
+                 (val != PRBS_MODE_PRBS23) and \
+                 (val != PRBS_MODE_PRBS31)):
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_gen_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
+            exit(1)
         # bit[4] to 0x008[4]
         self.masked_write(0x008, 0x0010, val & 0x0010)
         # bits[3:0] to 0x007[7:4]
@@ -204,8 +252,19 @@ class LTileHTileNode(node.MemoryNode):
         return (self.masked_read(0x110, 0x0007))
 
     def set_prbs_gen_ser_mode(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_gen_ser_mode")
+        if type(val) is int:
+            val = prbs_generator_serializer_mode_mapping[val]
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_gen_ser_mode: argument given is not an integer")
+            exit(1)
+        if ((val != PRBS_GENERATOR_SERIALIZER_MODE_64BIT) and
+                (val != PRBS_GENERATOR_SERIALIZER_MODE_10BIT)):
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_gen_ser_mode: unsupported PRBS generator serializer mode: " + str(hex(val)))
+            exit(1)
         self.masked_write(0x110, 0x0007, val & 0x0007)
 
     # PRBS Verifier registers
@@ -240,10 +299,24 @@ class LTileHTileNode(node.MemoryNode):
         return val
 
     def set_prbs_ver_prbs_pat(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_ver_prbs_pat")
+        # check if argument is a string and map it to register value
         if type(val) is str:
             val = prbs_mode_mapping[val]
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_ver_prbs_pat: argument given is not a string")
+            exit(1)
+        if ((val != PRBS_MODE_OFF) and \
+                 (val != PRBS_MODE_PRBS7) and \
+                 (val != PRBS_MODE_PRBS9) and \
+                 (val != PRBS_MODE_PRBS15) and \
+                 (val != PRBS_MODE_PRBS23) and \
+                 (val != PRBS_MODE_PRBS31)):
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_ver_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
+            exit(1)
         # bit[4] to 0x00C[0]
         self.masked_write(0x00C, 0x0001, (val & 0x0010) >> 4)
         # bits[3:0] to 0x00B[7:4]
@@ -265,8 +338,19 @@ class LTileHTileNode(node.MemoryNode):
         return (self.masked_read(0x13F, 0x000F))
 
     def set_prbs_ver_deser_factor(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_ver_deser_factor")
+        if type(val) is int:
+            val = prbs_verifier_deserializer_factor_mapping[val]
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_ver_deser_factor: argument given is not an integer")
+            exit(1)
+        if ((val != PRBS_VERIFIER_DESERIALIZER_FACTOR_64BIT) and
+                (val != PRBS_VERIFIER_DESERIALIZER_FACTOR_10BIT)):
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
+                print("ERROR: set_prbs_ver_deser_factor: unsupported PRBS verifier deserializer factor: " + str(hex(val)))
+            exit(1)
         self.masked_write(0x13F, 0x000F, val & 0x000F)
 
     # PRBS Soft Accumulators registers
