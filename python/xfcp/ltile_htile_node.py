@@ -25,7 +25,6 @@ THE SOFTWARE.
 
 from . import node
 
-DBG_PRINT = False
 
 PRINT_VERBOSITY_TRACE = 4
 PRINT_VERBOSITY_INFO = 3
@@ -83,13 +82,13 @@ class LTileHTileNode(node.MemoryNode):
         # multiple byte address by 4 so it does not get
         # truncated because of 32 bit access of AXI4-Lite (converted to Avalon-MM)
         val = self.read_word(addr << 2) & mask
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: masked_read: address: " + str(hex(addr)) + ", mask: " + str(hex(mask)) + ", data: " + str(hex(val)))
         return val
 
     # expected byte address
     def masked_write(self, addr, mask, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: masked_write: address: " + str(hex(addr)) + ", mask: " + str(hex(mask) + ", data: " + str(hex(val))))
         # multiple byte address by 4 so it does not get
         # truncated because of 32 bit access of AXI4-Lite (converted to Avalon-MM)
@@ -101,13 +100,13 @@ class LTileHTileNode(node.MemoryNode):
 
     # return True if the receiver is locked to data
     def get_rx_locked_to_data(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_rx_locked_to_data")
         return bool(self.masked_read(0x480, 0x0001))
 
     # return True if the receiver is locked to reference clock
     def get_rx_locked_to_ref(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_rx_locked_to_ref")
         return bool(self.masked_read(0x480, 0x0002))
 
@@ -115,62 +114,62 @@ class LTileHTileNode(node.MemoryNode):
     # presented in documentation L- and H-Tile Transceiver PHY User Guide 683621 | 2022.07.20
     # on pages 161 - 162
     def disable_background_calibration(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: disable_background_calibration")
         self.masked_write(0x542, 0x01, 0x00)
 
     def is_avmm_bus_busy(self):
         # return True if PreSICE has control of the internal configuration bus
         # return False if you have control of internal configuration bus
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: is_avmm_bus_busy")
         return bool(self.masked_read(0x481, 0x04))
 
     def is_rx_adaption_mode_manual(self):
         # return True if RX adaptation is in manual mode, return False otherwise
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: is_rx_adaption_mode_manual")
         return bool(self.masked_read(0x161, 0x20))
 
     def release_adaptation_from_reset(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: release_adaptation_from_reset")
         self.masked_write(0x148, 0x01, 0x01)
 
     def enable_cnt_to_detect_error_bits(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: enable_cnt_to_detect_error_bits")
         self.masked_write(0x169, 0x40, 0x01)
 
     def enable_serial_bit_checker(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: enable_serial_bit_checker")
         self.masked_write(0x168, 0x01, 0x01)
 
     def is_dfe_enabled(self):
         # return True if DFE is enabled, return False otherwise
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: is_dfe_enabled")
         return True if (self.masked_read(0x161, 0x40) == 0) else False
 
     def enable_dfe_speculation(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: enable_dfe_speculation")
         self.masked_write(0x169, 0x04, 0x04)
 
     def disable_dfe_speculation(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: disable_dfe_speculation")
         self.masked_write(0x169, 0x04, 0x00)
 
     def enable_serial_bit_checker_control(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: enable_serial_bit_checker_control")
         self.masked_write(0x158, 0x20, 0x20)
 
     # PRBS Generator registers
     def get_prbs_gen_prbs_tx_pma_data_sel(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_gen_prbs_tx_pma_data_sel")
         # bits[4:3] from 0x008[6:5]
         msb = self.masked_read(0x008, 0b1100000) >> 5
@@ -193,27 +192,27 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write(0x006, 0b00111, val & 0b00111)
 
     def get_prbs_gen_prbs9_dwidth(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_gen_prbs9_dwidth")
         return bool(self.masked_read(0x006, 0x0008))
 
     def set_prbs_gen_prbs9_dwidth(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_gen_prbs9_dwidth")
         self.masked_write(0x006, 0x0008, 0x0008 if val else 0x0000)
 
     def get_prbs_gen_prbs_clken(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_gen_prbs_clken")
         return bool(self.masked_read(0x006, 0x0040))
 
     def set_prbs_gen_prbs_clken(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_gen_prbs_clken")
         self.masked_write(0x006, 0x0040, 0x0040 if val else 0x0000)
 
     def get_prbs_gen_prbs_pat(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_gen_prbs_pat")
         # bit[4] from 0x008[4]
         msb = self.masked_read(0x008, 0x0010)
@@ -247,8 +246,6 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write(0x007, 0x00F0, (val & 0x000F) << 4)
 
     def get_prbs_gen_ser_mode(self):
-        if (DBG_PRINT):
-            print("TRACE: get_prbs_gen_ser_mode")
         return (self.masked_read(0x110, 0x0007))
 
     def set_prbs_gen_ser_mode(self, val):
@@ -269,27 +266,27 @@ class LTileHTileNode(node.MemoryNode):
 
     # PRBS Verifier registers
     def get_prbs_ver_prbs_clken(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_prbs_clken")
         return bool(self.masked_read(0x00A, 0x0080))
 
     def set_prbs_ver_prbs_clken(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_ver_prbs_clken")
         self.masked_write(0x00A, 0x0080, 0x0080 if val else 0x0000)
 
     def get_prbs_ver_rx_prbs_mask(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_rx_prbs_mask")
         return (self.masked_read(0x00B, 0x000C) >> 2)
 
     def set_prbs_ver_rx_prbs_mask(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_ver_rx_prbs_mask")
         self.masked_write(0x00B, 0x000C, val << 2)
 
     def get_prbs_ver_prbs_pat(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_prbs_pat")
         # bit[4] from 0x00C[0]
         msb = self.masked_read(0x00C, 0x0001)
@@ -323,17 +320,17 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write(0x00B, 0x00F0, (val & 0x000F) << 4)
 
     def get_prbs_ver_prbs9_dwidth(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_prbs9_dwidth")
         return bool(self.masked_read(0x00C, 0x0008))
 
     def set_prbs_ver_prbs9_dwidth(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_ver_prbs9_dwidth")
         self.masked_write(0x00C, 0x0008, 0x0008 if val else 0x0000)
 
     def get_prbs_ver_deser_factor(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_deser_factor")
         return (self.masked_read(0x13F, 0x000F))
 
@@ -355,42 +352,42 @@ class LTileHTileNode(node.MemoryNode):
 
     # PRBS Soft Accumulators registers
     def get_prbs_soft_acc_prbs_counter_en(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_counter_en")
         return bool(self.masked_read(0x500, 0x0001))
 
     def set_prbs_soft_acc_prbs_counter_en(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_soft_acc_prbs_counter_en")
         self.masked_write(0x500, 0x0001, 0x0001 if val else 0x0000)
 
     def get_prbs_soft_acc_prbs_reset(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_reset")
         return bool(self.masked_read(0x500, 0x0002))
 
     def set_prbs_soft_acc_prbs_reset(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_soft_acc_prbs_reset")
         self.masked_write(0x500, 0x0002, 0x0002 if val else 0x0000)
 
     def get_prbs_soft_acc_prbs_snap(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_snap")
         return bool(self.masked_read(0x500, 0x0004))
 
     def set_prbs_soft_acc_prbs_snap(self, val):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_prbs_soft_acc_prbs_snap")
         self.masked_write(0x500, 0x0004, 0x0004 if val else 0x0000)
 
     def get_prbs_soft_acc_prbs_done(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_done")
         return bool(self.masked_read(0x500, 0x0008))
 
     def get_prbs_soft_acc_prbs_acc_err_cnt(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_acc_err_cnt")
         val = 0
         move_iter = 0
@@ -408,7 +405,7 @@ class LTileHTileNode(node.MemoryNode):
         return val
 
     def get_prbs_soft_acc_prbs_acc_bit_cnt(self):
-        if (DBG_PRINT):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_soft_acc_prbs_acc_bit_cnt")
         val = 0
         move_iter = 0
