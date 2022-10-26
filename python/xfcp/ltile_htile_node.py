@@ -246,7 +246,17 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write(0x007, 0x00F0, (val & 0x000F) << 4)
 
     def get_prbs_gen_ser_mode(self):
-        return (self.masked_read(0x110, 0x0007))
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
+            print("TRACE: get_prbs_gen_ser_mode")
+        read = self.masked_read(0x110, 0x0007)
+        if (read == PRBS_GENERATOR_SERIALIZER_MODE_64BIT):
+            return 64
+        elif (read == PRBS_GENERATOR_SERIALIZER_MODE_10BIT):
+            return 10
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_WARN):
+                print("WARN: get_prbs_gen_ser_mode: unknown PRBS generator serializer mode: " + str(hex(read)))
+            return 0
 
     def set_prbs_gen_ser_mode(self, val):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
@@ -332,7 +342,15 @@ class LTileHTileNode(node.MemoryNode):
     def get_prbs_ver_deser_factor(self):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: get_prbs_ver_deser_factor")
-        return (self.masked_read(0x13F, 0x000F))
+        read = self.masked_read(0x13F, 0x000F)
+        if (read == PRBS_VERIFIER_DESERIALIZER_FACTOR_64BIT):
+            return 64
+        elif (read == PRBS_VERIFIER_DESERIALIZER_FACTOR_10BIT):
+            return 10
+        else:
+            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_WARN):
+                print("WARN: get_prbs_ver_deser_factor: unknown PRBS verifier deserializer factor: " + str(hex(read)))
+            return 0
 
     def set_prbs_ver_deser_factor(self, val):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
