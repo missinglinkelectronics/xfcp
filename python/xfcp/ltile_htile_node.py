@@ -465,33 +465,23 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write((addr_off << 11) + 0x321, 0x1E, 0x18)
         self.masked_write((addr_off << 11) + 0x322, 0x73, 0x41)
 
-    # function sets PRBS generator
-    def set_prbs_generator(self, addr_off, prbs_pattern = "prbs31", \
-            serializer_mode = 64):
-        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
-            print("TRACE: set_prbs_generator")
-        self.set_prbs_gen_prbs_pat(addr_off, prbs_pattern)
-        # use PRBS pattern generator (no square wave generator) so do not make it configurable
-        self.set_prbs_gen_prbs_tx_pma_data_sel(addr_off, PRBS_GENERATOR_TX_PMA_DATA_SEL_PRBS_PATTERN)
-        # disable PRBS 10 bit width selection
-        self.set_prbs_gen_prbs9_dwidth(addr_off, PRBS_GENERATOR_PRBS9_DWIDTH_DISABLE)
-        self.set_prbs_gen_ser_mode(addr_off, serializer_mode)
-        self.set_prbs_gen_prbs_clken(addr_off, 1)
-
-    # function sets PRBS verifier
-    def set_prbs_verifier(self, addr_off, prbs_pattern = "prbs31", \
+    # function sets PRBS generator and PRBS verifier
+    def set_prbs_gen_and_ver(self, addr_off, \
+            prbs_pattern = "prbs31", \
+            serializer_mode = 64, \
             deserializer_factor = 64):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
-            print("TRACE: set_prbs_verifier")
+            print("TRACE: set_prbs_gen_and_ver")
+        self.set_prbs_gen_prbs_pat(addr_off, prbs_pattern)
         self.set_prbs_ver_prbs_pat(addr_off, prbs_pattern)
-        # Following write operations has been taken from Intel example found on
-        # https://community.intel.com/t5/FPGA-Wiki/High-Speed-Transceiver-Demo-Designs-Stratix-10-GX-Series/ta-p/735749
-        # and downloaded via link https://www.intel.com/content/dam/altera-www/global/en_US/uploads/1/1c/Stratix10GX_software_lib.zip
-        # no guide references for these operations have ben found in L- and H-Tile Transceiver PHY User Guide 683621 | 2022.07.20
+        self.set_prbs_gen_ser_mode(addr_off, serializer_mode)
+        self.masked_write((addr_off << 11) + 0x06, 0xCF, 0x44)
         self.masked_write((addr_off << 11) + 0x0B, 0x0E, 0x00)
         self.masked_write((addr_off << 11) + 0x0C, 0x0A, 0x00)
-        self.set_prbs_ver_deser_factor(addr_off, deserializer_factor)
-        self.set_prbs_ver_prbs_clken(addr_off, 1)
+        self.set_prbs_ver_deser_factor(addr_off, serializer_mode)
+        self.masked_write((addr_off << 11) + 0x0A, 0x80, 0x80)
+        self.masked_write((addr_off << 11) + 0x500, 0x07, 0x01)
+
 
     # function sets PRBS accumulator
     def set_prbs_soft_accumulator(self, addr_off):
