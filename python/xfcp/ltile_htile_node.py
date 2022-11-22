@@ -482,6 +482,16 @@ class LTileHTileNode(node.MemoryNode):
         self.masked_write((addr_off << 11) + 0x0A, 0x80, 0x80)
         self.masked_write((addr_off << 11) + 0x500, 0x07, 0x01)
 
+    def set_transceiver_bounded_channels_configuration(self, addr_off):
+        if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
+            print("TRACE: set_transceiver_bounded_channels_configuration")
+        self.masked_write((addr_off << 11) + 0x0B, 0x02, 0x02)
+        self.masked_write((addr_off << 11) + 0x0C, 0x02, 0x02)
+        self.masked_write((addr_off << 11) + 0x10A, 0x01, 0x00)
+        self.masked_write((addr_off << 11) + 0x10B, 0x01, 0x01)
+        self.masked_write((addr_off << 11) + 0x111, 0x19, 0x18)
+        self.masked_write((addr_off << 11) + 0x123, 0xC0, 0x80)
+        self.masked_write((addr_off << 11) + 0x12A, 0x90, 0x90)
 
     # function sets PRBS accumulator
     def set_prbs_soft_accumulator(self, addr_off):
