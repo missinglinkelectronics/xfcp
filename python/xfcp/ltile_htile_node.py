@@ -468,6 +468,7 @@ class LTileHTileNode(node.MemoryNode):
     # function sets PRBS generator and PRBS verifier
     def set_prbs_gen_and_ver(self, addr_off, \
             prbs_pattern = "prbs31", \
+            use_bounded_channels_config = False, \
             serializer_mode = 64, \
             deserializer_factor = 64):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
@@ -481,7 +482,14 @@ class LTileHTileNode(node.MemoryNode):
         self.set_prbs_ver_deser_factor(addr_off, serializer_mode)
         self.masked_write((addr_off << 11) + 0x0A, 0x80, 0x80)
         self.masked_write((addr_off << 11) + 0x500, 0x07, 0x01)
+        if (use_bounded_channels_config):
+            self.set_transceiver_bounded_channels_configuration(addr_off)
 
+    # function performs bounded channels transceiver configuration
+    # reverse engineered from transceiver register space dump
+    # taken after successful BERT test for PCIe transceiver
+    # neither Intel SW example perform these steps, nor they have not been described in
+    # L- and H-Tile Transceiver PHY User Guide 683621 | 2022.07.20
     def set_transceiver_bounded_channels_configuration(self, addr_off):
         if (PRINT_VERBOSITY >= PRINT_VERBOSITY_TRACE):
             print("TRACE: set_transceiver_bounded_channels_configuration")
