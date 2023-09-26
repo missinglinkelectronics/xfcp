@@ -3,4 +3,6 @@
 *.pyc
 *.vvp
 *.kate-swp
-
+python/xfcp.egg-info
+python/build/
+python/venv/
