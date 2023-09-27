@@ -6,3 +6,4 @@
 python/xfcp.egg-info
 python/build/
 python/venv/
+python/.eggs/
