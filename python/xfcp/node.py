@@ -113,6 +113,16 @@ class Node(object):
 
         return n
 
+    def get_by_name(self, name, recursive=True):
+        for n in self.children:
+            if n.name == name:
+                return n
+            if recursive and len(n.children):
+                ret = n.get_by_name(name, recursive)
+                if ret:
+                    return ret
+        return None
+
     def find_by_type(self, t, prefix=16):
         l = []
 
