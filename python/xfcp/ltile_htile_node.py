@@ -183,9 +183,7 @@ class LTileHTileNode(node.MemoryNode):
             print("TRACE: set_prbs_gen_prbs_tx_pma_data_sel")
         if ((val != PRBS_GENERATOR_TX_PMA_DATA_SEL_SQUARE_WAVE) and \
                 (val != PRBS_GENERATOR_TX_PMA_DATA_SEL_PRBS_PATTERN)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_gen_prbs_tx_pma_data_sel: unsupport TX PMA data selected: " + str(hex(val)))
-            exit(1)
+            raise Exception("set_prbs_gen_prbs_tx_pma_data_sel: unsupport TX PMA data selected: " + str(hex(val)))
         # bits[4:3] to 0x008[6:5]
         self.masked_write((addr_off << 11) + 0x008, 0b1100000, (val & 0b11000) << 2)
         # bits[2:0] to 0x006[2:0]
@@ -228,18 +226,14 @@ class LTileHTileNode(node.MemoryNode):
         if type(val) is str:
             val = prbs_mode_mapping[val]
         else:
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_gen_prbs_pat: argument given is not a string")
-            exit(1)
+            raise Exception("set_prbs_gen_prbs_pat: argument given is not a string")
         if ((val != PRBS_MODE_OFF) and \
                  (val != PRBS_MODE_PRBS7) and \
                  (val != PRBS_MODE_PRBS9) and \
                  (val != PRBS_MODE_PRBS15) and \
                  (val != PRBS_MODE_PRBS23) and \
                  (val != PRBS_MODE_PRBS31)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_gen_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
-            exit(1)
+            raise Exception("set_prbs_gen_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
         # bit[4] to 0x008[4]
         self.masked_write((addr_off << 11) + 0x008, 0x0010, val & 0x0010)
         # bits[3:0] to 0x007[7:4]
@@ -264,14 +258,10 @@ class LTileHTileNode(node.MemoryNode):
         if type(val) is int:
             val = prbs_generator_serializer_mode_mapping[val]
         else:
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_gen_ser_mode: argument given is not an integer")
-            exit(1)
+            raise Exception("set_prbs_gen_ser_mode: argument given is not an integer")
         if ((val != PRBS_GENERATOR_SERIALIZER_MODE_64BIT) and
                 (val != PRBS_GENERATOR_SERIALIZER_MODE_10BIT)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_gen_ser_mode: unsupported PRBS generator serializer mode: " + str(hex(val)))
-            exit(1)
+            raise Exception("set_prbs_gen_ser_mode: unsupported PRBS generator serializer mode: " + str(hex(val)))
         self.masked_write((addr_off << 11) + 0x110, 0x0007, val & 0x0007)
 
     # PRBS Verifier registers
@@ -312,18 +302,14 @@ class LTileHTileNode(node.MemoryNode):
         if type(val) is str:
             val = prbs_mode_mapping[val]
         else:
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_ver_prbs_pat: argument given is not a string")
-            exit(1)
+            raise Exception("set_prbs_ver_prbs_pat: argument given is not a string")
         if ((val != PRBS_MODE_OFF) and \
                  (val != PRBS_MODE_PRBS7) and \
                  (val != PRBS_MODE_PRBS9) and \
                  (val != PRBS_MODE_PRBS15) and \
                  (val != PRBS_MODE_PRBS23) and \
                  (val != PRBS_MODE_PRBS31)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_ver_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
-            exit(1)
+            raise Exception("set_prbs_ver_prbs_pat: unsupported PRBS pattern selected: " + str(hex(val)))
         # bit[4] to 0x00C[0]
         self.masked_write((addr_off << 11) + 0x00C, 0x0001, (val & 0x0010) >> 4)
         # bits[3:0] to 0x00B[7:4]
@@ -358,14 +344,10 @@ class LTileHTileNode(node.MemoryNode):
         if type(val) is int:
             val = prbs_verifier_deserializer_factor_mapping[val]
         else:
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_ver_deser_factor: argument given is not an integer")
-            exit(1)
+            raise Exception("set_prbs_ver_deser_factor: argument given is not an integer")
         if ((val != PRBS_VERIFIER_DESERIALIZER_FACTOR_64BIT) and
                 (val != PRBS_VERIFIER_DESERIALIZER_FACTOR_10BIT)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_ver_deser_factor: unsupported PRBS verifier deserializer factor: " + str(hex(val)))
-            exit(1)
+            raise Exception("set_prbs_ver_deser_factor: unsupported PRBS verifier deserializer factor: " + str(hex(val)))
         self.masked_write((addr_off << 11) + 0x13F, 0x000F, val & 0x000F)
 
     # PRBS Soft Accumulators registers
@@ -510,13 +492,9 @@ class LTileHTileNode(node.MemoryNode):
         self.set_prbs_soft_acc_prbs_reset(addr_off, 0)
         self.set_prbs_soft_acc_prbs_snap(addr_off, 0)
         if (self.get_prbs_soft_acc_prbs_acc_err_cnt(addr_off)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_soft_accumulator: PRBS error counter has not been reseted")
-            exit(1)
+            raise Exception("set_prbs_soft_accumulator: PRBS error counter has not been reseted")
         if (self.get_prbs_soft_acc_prbs_acc_bit_cnt(addr_off)):
-            if (PRINT_VERBOSITY >= PRINT_VERBOSITY_ERROR):
-                print("ERROR: set_prbs_soft_accumulator: PRBS bit counter has not been reseted")
-            exit(1)
+            raise Exception("set_prbs_soft_accumulator: PRBS bit counter has not been reseted")
 
 node.register(LTileHTileNode, 0x9A83)
 
