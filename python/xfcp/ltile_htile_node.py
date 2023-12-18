@@ -96,7 +96,7 @@ class LTileHTileNode(node.MemoryNode):
 
     def dump_reg_space(self, addr_off, start, stop):
         for addr in range(start, stop, 0x001):
-            print("Address: " + str(hex(addr)) + ": " + str(hex(self.masked_read(addr_off, addr, 0xFF))))
+            print("Address: " + str(hex(addr)) + ": " + str(hex(self.masked_read(addr, 0xFF))))
 
     # return True if the receiver is locked to data
     def get_rx_locked_to_data(self, addr_off):
